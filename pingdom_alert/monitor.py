@@ -20,14 +20,17 @@ class Monitor:
         self.down_since = {}
         self.alerted_at = {}
 
-    def run_forever(self, *, interval=60):
+    def run_forever(self, *, interval=60, sdnotify=lambda message: None):
         self.logger.info("Start")
+        sdnotify('READY=1')
 
         while True:
             try:
                 self.tick()
             except Exception:
                 self.logger.exception("Ignoring exception")
+            else:
+                sdnotify('WATCHDOG=1')
             time.sleep(interval)
 
     def tick(self):

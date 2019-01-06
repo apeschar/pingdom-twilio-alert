@@ -16,6 +16,8 @@ def main():
     logging.basicConfig(level=logging.INFO,
                         format='[%(asctime)s] %(name)s %(levelname)s - %(message)s')
 
+    logger = logging.getLogger(__name__)
+
     parser = ArgumentParser()
     parser.add_argument('--config', '-c', type=str, default='config.ini')
     args = parser.parse_args()
@@ -37,7 +39,16 @@ def main():
                       alert_after=timedelta(minutes=float(config['monitor']['alert_after'])),
                       alert_again_after=timedelta(minutes=float(config['monitor']['alert_again_after'])))
 
-    monitor.run_forever()
+    try:
+        from sdnotify import SystemdNotifier
+        sdnotify = SystemdNotifier().notify
+    except Exception as e:
+        logger.info("Not using sdnotify: %s: %s", e.__class__.__name__, str(e))
+        sdnotify = lambda message: None
+    else:
+        logger.info("Using sdnotify")
+
+    monitor.run_forever(sdnotify=sdnotify)
 
 
 if __name__ == '__main__':
