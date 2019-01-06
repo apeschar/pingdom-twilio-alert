@@ -26,7 +26,7 @@ Use make to prepare the python venv.
 
     make
 
-Then you should be able to run the alerted as follows:
+Then you should be able to run the monitor as follows:
 
     venv/bin/python bin/alert
 
