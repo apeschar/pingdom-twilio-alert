@@ -23,7 +23,7 @@ class Pingdom:
         })
         with urlopen(request) as f:
             data = f.read()
-            return json.loads(data)
+            return json.loads(data.decode('utf-8'))
 
 
 def b64encode_string(s):
