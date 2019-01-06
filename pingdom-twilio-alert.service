@@ -1,0 +1,9 @@
+[Service]
+Type=notify
+User=pingdom
+WatchdogSec=300s
+ExecStart=/usr/bin/env venv/bin/python bin/alert
+WorkingDirectory=/home/pingdom/pingdom-twilio-alert
+
+[Install]
+WantedBy=multi-user.target
