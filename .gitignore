@@ -1,2 +1,4 @@
+config.ini
 /config.py
 .pytest_cache
+/venv
