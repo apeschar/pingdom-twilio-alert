@@ -1,0 +1,16 @@
+[monitor]
+alert_after = 15
+alert_again_after = 60
+
+[notification]
+from_number = +1234
+to_number = +5678
+
+[twilio]
+account = ACdeadbeef
+token = cafebabe
+
+[pingdom]
+app_key = qwertyuiop
+user = hi@albert.cx
+password = letmein
