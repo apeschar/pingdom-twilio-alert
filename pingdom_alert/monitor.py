@@ -59,7 +59,7 @@ class Monitor:
             check = next(c for c in checks if c['id'] == check_id)
             messages.append("Check %s is down since %s." % (
                 check['name'],
-                down_since.strftime('%Y-%m-%d %H:%M:%S %Z')
+                down_since.astimezone(datetime.timezone.utc).strftime('%Y-%m-%d %H:%M:%S UTC')
             ))
             alerted.add(check_id)
 
