@@ -11,8 +11,8 @@ class TimeRange:
         match = re.match(time_pattern + '-' + time_pattern, time_str)
         if not match:
             raise ValueError("Unparsable time range: %s" % time_str)
-        self.start_time = (int(match[1]), int(match[2]))
-        self.end_time = (int(match[3]), int(match[4]))
+        self.start_time = (int(match.group(1)), int(match.group(2)))
+        self.end_time = (int(match.group(3)), int(match.group(4)))
         self.timezone = pytz.timezone(timezone_str)
 
     def includes(self, time):
