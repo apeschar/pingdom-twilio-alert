@@ -35,7 +35,7 @@ class TestTimeRange:
 
     def test_time_range(self):
         EET = 'Europe/Sofia'
-        dt = dateutil.parser.parse
+        dt = lambda s: dateutil.parser.parse(s, tzinfos=lambda tzname, _: pytz.timezone(tzname))
 
         values = (
 
@@ -62,6 +62,11 @@ class TestTimeRange:
             (EET, '21:00 - 21:30', dt('2019-01-01 19:00 UTC'), True),
             (EET, '21:00 - 21:30', dt('2019-01-01 19:30 UTC'), True),
             (EET, '21:00 - 21:30', dt('2019-01-01 19:31 UTC'), False),
+
+            (EET, '21:00 - 21:30', dt('2019-01-01 19:59 CET'), False),
+            (EET, '21:00 - 21:30', dt('2019-01-01 20:00 CET'), True),
+            (EET, '21:00 - 21:30', dt('2019-01-01 20:30 CET'), True),
+            (EET, '21:00 - 21:30', dt('2019-01-01 20:31 CET'), False),
 
         )
 
