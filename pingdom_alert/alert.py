@@ -9,6 +9,7 @@ from twilio.rest import Client
 
 from .monitor import Monitor
 from .pingdom import Pingdom
+from .time_range import TimeRange
 from .twilio import TwilioNotifier
 
 
@@ -35,9 +36,19 @@ def main():
                       config['pingdom']['user'],
                       config['pingdom']['password'])
 
+    if 'quiet_hours' in config['monitor']:
+        time_range = TimeRange(config['monitor']['quiet_hours'],
+                               config['monitor']['quiet_hours_timezone'])
+        test_alert_time = time_range.excludes
+        logger.info("Quiet hours: %r" % time_range)
+    else:
+        logger.info("No quiet hours")
+        test_alert_time = lambda _: True
+
     monitor = Monitor(pingdom=pingdom, notifier=notifier,
                       alert_after=timedelta(minutes=float(config['monitor']['alert_after'])),
-                      alert_again_after=timedelta(minutes=float(config['monitor']['alert_again_after'])))
+                      alert_again_after=timedelta(minutes=float(config['monitor']['alert_again_after'])),
+                      test_alert_time=test_alert_time)
 
     try:
         from sdnotify import SystemdNotifier

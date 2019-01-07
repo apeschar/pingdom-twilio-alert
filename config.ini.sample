@@ -1,6 +1,8 @@
 [monitor]
 alert_after = 15
 alert_again_after = 60
+quiet_hours = 22:30 - 08:30
+quiet_hours_timezone = Europe/Sofia
 
 [notification]
 from_number = +1234

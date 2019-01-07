@@ -2,19 +2,25 @@ import datetime
 import logging
 import time
 
+from .time_range import TimeRange
+
 
 class Monitor:
 
     def __init__(self, *, pingdom, notifier,
                  clock=lambda: datetime.datetime.now(datetime.timezone.utc),
                  alert_after=datetime.timedelta(minutes=15),
-                 alert_again_after=datetime.timedelta(minutes=60)):
+                 alert_again_after=datetime.timedelta(minutes=60),
+                 test_alert_time=lambda time: True):
 
         self.pingdom = pingdom
         self.notifier = notifier
         self.clock = clock
         self.alert_after = alert_after
         self.alert_again_after = alert_again_after
+        self.test_alert_time = test_alert_time
+
+        test_alert_time(self.clock())
 
         self.logger = logging.getLogger(__name__)
         self.down_since = {}
@@ -62,6 +68,10 @@ class Monitor:
                 down_since.astimezone(datetime.timezone.utc).strftime('%Y-%m-%d %H:%M:%S UTC')
             ))
             alerted.add(check_id)
+
+        if not self.test_alert_time(self.clock()) and messages:
+            self.logger.info("In quiet hours; not alerting")
+            return
 
         if messages:
             joined_message = " ".join(messages)
@@ -132,6 +142,16 @@ class TestMonitor:
         self.expect_no_notifications_for_minutes(10)
         self.pingdom.status = 'down'
         self.expect_notification_after_minutes(50)
+        self.expect_notification_after_minutes(60)
+
+    def test_quiet_hours(self):
+        quiet_time = TimeRange('00:00 - 00:59', 'UTC')
+
+        self.monitor = Monitor(pingdom=self.pingdom,
+                               notifier=self.notifier,
+                               clock=lambda: self.now,
+                               test_alert_time=quiet_time.excludes)
+
         self.expect_notification_after_minutes(60)
 
     def expect_notification_after_minutes(self, minutes):
