@@ -11,7 +11,8 @@ class Monitor:
                  clock=lambda: datetime.datetime.now(datetime.timezone.utc),
                  alert_after=datetime.timedelta(minutes=15),
                  alert_again_after=datetime.timedelta(minutes=60),
-                 test_alert_time=lambda time: True):
+                 test_alert_time=lambda time: True,
+                 ignore_patterns=()):
 
         self.pingdom = pingdom
         self.notifier = notifier
@@ -19,6 +20,7 @@ class Monitor:
         self.alert_after = alert_after
         self.alert_again_after = alert_again_after
         self.test_alert_time = test_alert_time
+        self.ignore_patterns = ignore_patterns
 
         test_alert_time(self.clock())
 
@@ -41,6 +43,7 @@ class Monitor:
 
     def tick(self):
         checks = self.pingdom.get_checks()
+        checks = [c for c in checks if self._filter_check(c)]
 
         self.down_since = dict((c['id'], self.down_since.get(c['id'], self.clock()))
                                for c in checks if c['status'] == 'down')
@@ -80,6 +83,18 @@ class Monitor:
 
         for check_id in alerted:
             self.alerted_at[check_id] = self.clock()
+
+    def _filter_check(self, check):
+        for pattern in self.ignore_patterns:
+            try:
+                if pattern.match(check['name']):
+                    return False
+            except Exception as e:
+                self.logger.error(
+                    "Caught %s while testing ignore pattern: %s",
+                    e.__class__.__name__, str(e)
+                )
+        return True
 
 
 class TestMonitor:

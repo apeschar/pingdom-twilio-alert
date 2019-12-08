@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 
 import logging
+import re
 from argparse import ArgumentParser
 from configparser import ConfigParser
 from datetime import timedelta
@@ -45,10 +46,16 @@ def main():
         logger.info("No quiet hours")
         test_alert_time = lambda _: True
 
+    if 'ignore_name' in config['monitor']:
+        ignore_patterns = [re.compile(config['monitor']['ignore_name'])]
+    else:
+        ignore_patterns = []
+
     monitor = Monitor(pingdom=pingdom, notifier=notifier,
                       alert_after=timedelta(minutes=float(config['monitor']['alert_after'])),
                       alert_again_after=timedelta(minutes=float(config['monitor']['alert_again_after'])),
-                      test_alert_time=test_alert_time)
+                      test_alert_time=test_alert_time,
+                      ignore_patterns=ignore_patterns)
 
     try:
         from sdnotify import SystemdNotifier
